@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback } from 'react';
 import api from '../api/axios';
 import Webcam from 'react-webcam';
 import { UserPlus, Shield, User as UserIcon, Camera, Check } from 'lucide-react';
+import { useEffect } from 'react';
+import VisitorsTable from './VisitorsTable';
 
 function ManageUsers({ adminId }) {
     const [formData, setFormData] = useState({
@@ -49,6 +51,22 @@ function ManageUsers({ adminId }) {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        let mounted = true;
+        const fetchVisitors = async () => {
+            try {
+                const res = await api.get('/admin/users/visitors');
+                if (mounted) setVisitors(res.data);
+            } catch (e) {
+                // ignore
+            }
+        };
+        fetchVisitors();
+        return () => { mounted = false };
+    }, []);
+
+    const [visitors, setVisitors] = useState([]);
 
     return (
         <div className="card manage-users">
@@ -143,6 +161,10 @@ function ManageUsers({ adminId }) {
                     <UserPlus size={18} /> {loading ? 'Creating...' : 'Register User'}
                 </button>
             </form>
+
+            <div style={{ marginTop: '1rem' }}>
+                <VisitorsTable visitors={visitors} />
+            </div>
         </div>
     );
 }

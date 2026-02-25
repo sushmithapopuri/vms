@@ -183,6 +183,24 @@ async def update_user(user_id: int, update_data: UserUpdate, admin_id: int, db: 
     db.refresh(user)
     return user
 
+
+@router.get("/users/visitors")
+async def list_visitors(db: Session = Depends(get_db)):
+    """Return a lightweight list of registered visitors for admin/security consoles."""
+    users = db.query(DBUser).filter(DBUser.role == UserRole.VISITOR).all()
+    return [
+        {
+            "id": u.id,
+            "full_name": u.full_name,
+            "phone_number": u.phone_number,
+            "email": u.email,
+            "is_verified": u.is_verified,
+            "face_image_path": u.face_image_path,
+            "created_at": u.created_at,
+        }
+        for u in users
+    ]
+
 @router.get("/proxy-image")
 async def proxy_image(path: str):
     if not os.path.exists(path):

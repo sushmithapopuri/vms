@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { Search, LogIn, LogOut, User, ShieldCheck, History, Info, Plus } from 'lucide-react';
 import AppointmentModal from './AppointmentModal';
+import VisitorsTable from './VisitorsTable';
 
 function SecurityConsole() {
     const [appointments, setAppointments] = useState([]);
@@ -11,6 +12,7 @@ function SecurityConsole() {
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('live'); // 'live' or 'history'
     const [recentActivity, setRecentActivity] = useState([]);
+    const [visitors, setVisitors] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [preSelectedVisitor, setPreSelectedVisitor] = useState(null);
 
@@ -22,6 +24,13 @@ function SecurityConsole() {
             ]);
             setAppointments(dailyRes.data);
             setRecentActivity(recentRes.data);
+            // fetch visitors list for quick lookup
+            try {
+                const vres = await api.get('/admin/users/visitors');
+                setVisitors(vres.data);
+            } catch (e) {
+                // non-fatal
+            }
         } catch (err) {
             console.error("Failed to fetch security data");
         }
@@ -230,6 +239,8 @@ function SecurityConsole() {
                         </div>
                     )}
                 </div>
+                {/* Visitors list accessible to security */}
+                <VisitorsTable visitors={visitors} />
             </div>
 
             {showModal && (
