@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vms-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - vms-db-data:/app/vms.db
+      - vms-face-data:/app/storage/faces
+    environment:
+      - DATABASE_URL=sqlite:////app/vms.db
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api/v1  # Using Nginx proxy prefix
+    container_name: vms-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  vms-db-data:
+  vms-face-data:
